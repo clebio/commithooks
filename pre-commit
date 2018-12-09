@@ -1,7 +1,23 @@
 #!/bin/sh
-terraform fmt -write=false -check=true
 
-if [ $? -ne 0 ];
+terra_fmt () {
+    if [ ! -f 'docs/README.md' ]
+    then
+        echo 'Terraform repos must have a `docs/README.md`'
+        exit -3
+    fi
+
+    cat docs/README.md > ./README.md
+    terraform-docs md . >> README.md
+    terraform fmt -write=false -check=true
+    if [ $? -ne 0 ];
+    then
+        echo "needs moar fmt'ing"
+        exit -5
+    fi
+}
+
+if [ "x$(find . -name '*.tf' -print)" != "x" ]
 then
-    echo "needs moar fmt'ing" && exit -1 ;
+    terra_fmt
 fi
