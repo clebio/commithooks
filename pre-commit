@@ -1,14 +1,12 @@
-#!/bin/sh
+#!/usr/bin/env bash
+#set -x
 
 terra_fmt () {
-    if [ ! -f 'docs/README.md' ]
+    if [ -f '.module' ]
     then
-        echo 'Terraform repos must have a `docs/README.md`'
-        exit -3
+        terra_fmt_modules
     fi
 
-    cat docs/README.md > ./README.md
-    terraform-docs md . >> README.md
     terraform fmt -write=false -check=true
     if [ $? -ne 0 ];
     then
@@ -17,7 +15,38 @@ terra_fmt () {
     fi
 }
 
-if [ "x$(find . -name '*.tf' -print)" != "x" ]
-then
-    terra_fmt
-fi
+terra_fmt_modules () {
+    if [ ! -f 'docs/README.md' ]
+    then
+        echo 'Terraform repos must have a `docs/README.md`'
+        exit -3
+    fi
+
+    cat docs/README.md > ./README.md
+    terraform-docs md . >> README.md
+}
+
+go_commit () {
+    echo 'Stub for golang pre-commit hooks'
+}
+
+py_commit () {
+    echo 'stub for python pre-commit hooks'
+    # pylint requires a module directory. If git ls-files shows one a
+    # few levels deep, how do we want to handle that?
+}
+
+declare -A FILTERS=(
+    [tf]=terra_fmt
+    [go]=go_commit
+    [py]=py_commit)
+
+for k in ${!FILTERS[@]}
+do
+    if [ "x$(git ls-files -- *.${k} | xargs)" != "x" ]
+    then
+        ${FILTERS[$k]}
+    fi
+done
+
+exit 0
