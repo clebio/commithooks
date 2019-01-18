@@ -19,3 +19,4 @@ repos:
     sha: v1.1.6
     hooks:
       - id: forbid-tabs
+        types: [python]

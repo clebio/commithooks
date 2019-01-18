@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 #set -x
+unset GIT_LITERAL_PATHSPECS
+
+pre-commit run --all-files -c $(git config --get core.hookspath)/.pre-commit-config.yaml
 
 terra_fmt () {
     if [ -f '.module' ]
     then
         terra_fmt_modules
-    fi
-
-    terraform fmt -write=false -check=true
-    if [ $? -ne 0 ];
-    then
-        echo "needs moar fmt'ing"
-        exit -5
     fi
 }
 
@@ -32,8 +28,7 @@ go_commit () {
 
 py_commit () {
     echo 'stub for python pre-commit hooks'
-    # pylint requires a module directory. If git ls-files shows one a
-    # few levels deep, how do we want to handle that?
+    #find . -name '__init__.py' -exec bash -c 'pylint --ignore=psycopg2 $(dirname {})' \;
 }
 
 declare -A FILTERS=(
